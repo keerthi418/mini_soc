@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SentinelX | SOC Investigation</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">SX</div><div><strong>SentinelX</strong><small>SECURITY OPERATIONS</small></div></div>
+    <div class="nav-label">WORKSPACE</div>
+    <button class="nav active" data-target="overview">▦ <span>Overview</span></button>
+    <button class="nav" data-target="alerts">◉ <span>Threat Alerts</span><b id="nav-alert-count">0</b></button>
+    <button class="nav" data-target="timeline">☷ <span>Event Timeline</span></button>
+    <button class="nav" data-target="ingest">⇧ <span>Log Analysis</span></button>
+    <button class="nav" data-target="devices">⌁ <span>Wi-Fi Devices</span></button>
+    <button class="nav" data-target="requests">✓ <span>Consent Requests</span></button>
+    <button class="nav" data-target="audit">▤ <span>Audit Log</span></button>
+    <button class="nav" data-target="storage">☁ <span>Storage</span></button>
+    <div class="sidebar-bottom"><span class="online-dot"></span><div><b>Detection engine</b><small id="engine-status">Connecting...</small></div></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><span class="eyebrow">SECURITY OPERATIONS CENTER</span><h1>Investigation Overview</h1></div><div class="top-actions"><button class="button secondary" id="back-btn" hidden>← Back</button><span class="status-pill"><i></i> SYSTEM ONLINE</span><button class="button secondary" id="refresh-btn">↻ Refresh</button></div></header>
+    <section class="welcome"><div><p class="eyebrow">THREAT MONITORING / LIVE WORKSPACE</p><h2>See the signal. Investigate the story.</h2><p>Analyze authentication and system events, surface suspicious patterns, and review evidence in one place.</p></div><div class="shield">⬡</div></section>
+    <section class="metrics" id="metrics">
+      <article class="metric"><div class="metric-top"><span>Total log events</span><span class="metric-icon">≋</span></div><strong id="total-logs">—</strong><small>Events analyzed</small></article>
+      <article class="metric"><div class="metric-top"><span>Detected alerts</span><span class="metric-icon orange">◉</span></div><strong id="total-alerts">—</strong><small>Rule-based findings</small></article>
+      <article class="metric"><div class="metric-top"><span>High severity</span><span class="metric-icon red">!</span></div><strong id="high-alerts">—</strong><small>Requires review</small></article>
+      <article class="metric"><div class="metric-top"><span>Failed logins</span><span class="metric-icon blue">⌁</span></div><strong id="failed-logins">—</strong><small>Authentication failures</small></article>
+    </section>
+    <section class="content-grid" id="content-grid">
+      <article class="panel chart-panel"><div class="panel-head"><div><h3>Alert severity</h3><p>Distribution of current findings</p></div><span class="mini-tag">ANALYTICS</span></div><div class="chart-wrap"><canvas id="severityChart"></canvas><div id="chart-empty" class="chart-empty" hidden>No alerts detected in this dataset.</div></div></article>
+      <article class="panel upload-panel" id="ingest"><div class="panel-head"><div><h3>Analyze log file</h3><p>Upload a CSV export to inspect events</p></div><span class="upload-icon">⇧</span></div><label class="dropzone" for="log-file"><span class="upload-cloud">↑</span><strong>Choose a CSV log file</strong><small>Maximum file size: 5 MB</small><input type="file" id="log-file" accept=".csv"></label><div class="file-name" id="file-name">No file selected</div><button class="button primary full" id="analyze-btn">Analyze logs <span>→</span></button><a class="sample-link" href="/api/sample.csv">Download sample CSV ↗</a><div id="upload-message" role="status"></div></article>
+    </section>
+    <section class="panel alerts-panel" id="alerts"><div class="panel-head"><div><h3>Priority alerts</h3><p>Ranked by estimated risk score</p></div><span class="mini-tag" id="alert-badge">0 FINDINGS</span></div><div class="table-wrap"><table><thead><tr><th>DETECTION</th><th>SOURCE IP</th><th>SEVERITY</th><th>RISK</th><th>EVIDENCE</th></tr></thead><tbody id="alerts-body"><tr><td colspan="5" class="empty-cell">Loading sample analysis…</td></tr></tbody></table></div></section>
+    <section class="panel timeline-panel" id="timeline"><div class="panel-head"><div><h3>Recent event timeline</h3><p>Latest records from the analyzed dataset</p></div><span class="mini-tag">EVENT STREAM</span></div><div class="table-wrap"><table><thead><tr><th>TIMESTAMP</th><th>USER</th><th>SOURCE IP</th><th>EVENT</th><th>STATUS</th></tr></thead><tbody id="timeline-body"><tr><td colspan="5" class="empty-cell">Loading events…</td></tr></tbody></table></div></section>
+    <section class="panel extra-page" id="devices" hidden>
+      <div class="panel-head"><div><h3>Local Wi-Fi device inventory</h3><p>Best-effort view from this server laptop's ARP cache</p></div><button class="button primary" id="scan-devices">Scan local cache ↻</button></div>
+      <p class="notice">Privacy boundary: this lists network addresses only. It cannot tell what someone is doing on another laptop, read their screen/files, or monitor apps. Devices may be missing if your OS has not recently learned their address.</p>
+      <div id="device-message" class="muted">Press Scan to inspect the local ARP cache.</div>
+      <div class="table-wrap"><table><thead><tr><th>IP ADDRESS</th><th>MAC ADDRESS</th><th>HOSTNAME</th><th>LAST SEEN</th></tr></thead><tbody id="devices-body"><tr><td colspan="4" class="empty-cell">No scan yet.</td></tr></tbody></table></div>
+      <h3>Create a consent request</h3><p class="muted">Use only with a device owner who has agreed to participate. This records a request; it does not push a notification to another laptop unless a consent-enabled client is installed there.</p>
+      <div class="request-form"><input id="req-name" placeholder="Device / owner name"><input id="req-ip" placeholder="Device IP address"><input id="req-purpose" placeholder="Purpose (e.g. help troubleshoot Wi-Fi)"><input id="req-by" placeholder="Requested by" value="Server laptop analyst"><button class="button primary" id="create-request">Create request</button></div>
+    </section>
+    <section class="panel extra-page" id="requests" hidden><div class="panel-head"><div><h3>Consent requests</h3><p>Accept or deny with a mandatory explanation</p></div><button class="button secondary" id="refresh-requests">Refresh</button></div><div id="requests-list" class="request-list">Loading requests…</div></section>
+    <section class="panel extra-page" id="audit" hidden><div class="panel-head"><div><h3>Audit trail</h3><p>Local record of scans, analysis and consent decisions</p></div><button class="button secondary" id="refresh-audit">Refresh</button></div><div class="table-wrap"><table><thead><tr><th>TIME</th><th>ACTION</th><th>DETAILS</th></tr></thead><tbody id="audit-body"><tr><td colspan="3" class="empty-cell">Loading…</td></tr></tbody></table></div></section>
+    <section class="panel extra-page" id="storage" hidden><div class="panel-head"><div><h3>Database & cloud storage</h3><p>SQLite is enabled locally; cloud is optional</p></div></div><div id="storage-status" class="notice">Loading storage status…</div><h3>Cloud setup checklist</h3><ol><li>Create a private bucket in your chosen cloud provider.</li><li>Use a dedicated least-privilege service identity.</li><li>Store credentials in environment variables, never in Git/source code.</li><li>Enable encryption, access logging, retention and backups.</li><li>Upload only approved data and test restore before relying on it.</li></ol><p class="muted">Cloud upload is not active in this version. SQLite database file: <code>sentinelx.db</code> inside the project folder.</p></section>
+    <footer>SentinelX MVP · Rule-based detection for educational and lab use · <span id="footer-status">Ready</span></footer>
+  </main>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
